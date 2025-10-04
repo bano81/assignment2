@@ -38,21 +38,6 @@ AlarmQueue aq_create( ) {
   return (AlarmQueue) newQueue;
 }
 
-void aq_destroy( AlarmQueue aq) {
-  if (aq == NULL) return; //queue not initialized
-  AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
-  Msg * current = queue->head;
-  while (current != NULL) {
-      Msg * next = current->next; // Store next message
-      free(current->ID); // Free the message ID
-      free(current); // Free the message struct
-      current = next;
-  }
-  pthread_mutex_destroy(&queue->lock); // Destroy the mutex
-  pthread_cond_destroy(&queue->not_empty); // Destroy the condition variable
-  free(queue);
-}
-
 int aq_send_unsafe(AlarmQueue aq, void * msg, MsgKind k) {
   if (aq == NULL) return AQ_UNINIT;
   if (msg == NULL) return AQ_NULL_MSG;
