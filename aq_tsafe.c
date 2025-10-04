@@ -11,11 +11,6 @@
 #include "aq.h"
 
 //Queue implementation here
-/*typedef struct msg{
-    int ID;
-    MsgKind type; //'n' for normal, 'a' for alarm
-    struct msg * next;
-} Msg;*/
  typedef struct msg{
     void* ID;
     MsgKind type; //'n' for normal, 'a' for alarm

@@ -10,8 +10,9 @@
 #include "aq.h"
 
 //Queue implementation here
+
 typedef struct msg{
-    int ID;
+    void* ID;
     MsgKind type; //'n' for normal, 'a' for alarm
     struct msg * next;
 } Msg;
@@ -33,7 +34,20 @@ AlarmQueue aq_create( ) {
   return (AlarmQueue) newQueue;
 }
 
-int aq_send(AlarmQueue aq, void * msg, MsgKind k){
+void aq_destroy( AlarmQueue aq) {
+  if (aq == NULL) return; //queue not initialized
+  AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
+  Msg * current = queue->head;
+  while (current != NULL) {
+      Msg * next = current->next; // Store next message
+      free(current->ID); // Free the message ID
+      free(current); // Free the message struct
+      current = next;
+  }
+  free(queue);
+}
+
+int aq_send(AlarmQueue aq, void * msg, MsgKind k) {
   if (aq == NULL) return AQ_UNINIT;
   if (msg == NULL) return AQ_NULL_MSG;
   AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
@@ -46,14 +60,14 @@ int aq_send(AlarmQueue aq, void * msg, MsgKind k){
   Msg * newMsg = malloc(sizeof(Msg));
   if (newMsg == NULL) return AQ_NO_ROOM; // malloc failed
   
-  newMsg->ID = *((int *) msg);  // This might also be problematic - see below
+  newMsg->ID = msg;  
   newMsg->type = k;
   newMsg->next = NULL;
   
   if(queue->head == NULL){ // empty queue
       queue->head = newMsg;
       queue->tail = newMsg;
-  } if(k == AQ_ALARM) { // insert alarm at the front
+  } else if(k == AQ_ALARM) { // insert alarm at the front
       newMsg->next = queue->head;
       queue->head = newMsg;
   } else { // normal message, add to the end
@@ -70,30 +84,27 @@ int aq_recv( AlarmQueue aq, void * * msg) {
   AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
   if (queue->size == 0) return AQ_NO_MSG; //empty queue
   Msg * toReceive = queue->head;
-  *msg = malloc(sizeof(int));
-  if (*msg == NULL) return AQ_NO_MSG; //malloc failed
-  *((int *) *msg) = toReceive->ID;  // cast to int pointer and dereference to store ID
+  *msg = toReceive->ID; // Assign the ID to the output parameter
   
   queue->head = toReceive->next;
   if (queue->head == NULL) queue->tail = NULL; //queue is now empty
   queue->size--;
   if (toReceive->type == AQ_ALARM) queue->alarmCount--;
+  MsgKind msgType = toReceive->type;
   
   free(toReceive);  // free the memmory allocated for the message struct
-  
-  return toReceive->type;
+
+  return msgType;
 }
 
 int aq_size( AlarmQueue aq) {
   if (aq == NULL) return AQ_UNINIT; //queue not initialized
-  return ((AlarmQueueImpl *) aq)->size;
+  AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
+  return queue->size;
 }
 
 int aq_alarms( AlarmQueue aq) {
   if( aq == NULL) return AQ_UNINIT; //queue not initialized
-  return ((AlarmQueueImpl *) aq)->alarmCount;
+  AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
+  return queue->alarmCount;
 }
-
-
-
-
