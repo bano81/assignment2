@@ -24,14 +24,19 @@ TEST_FILE   ?= aq_test.c
 TEST_SOURCES = $(TEST_FILE) aux.c
 TEST_OBJECTS = $(TEST_SOURCES:.c=.o)
 
+TEST_FILE2   ?= test2.c
+TEST_SOURCES2 = $(TEST_FILE2) aux.c
+TEST_OBJECTS2 = $(TEST_SOURCES2:.c=.o)
+
 DEMO_EXECUTABLE = demo
 TEST_EXECUTABLE = test
+TEST_EXECUTABLE2 = test2
 
-EXECUTABLES = $(DEMO_EXECUTABLE) $(TEST_EXECUTABLE)
+EXECUTABLES = $(DEMO_EXECUTABLE) $(TEST_EXECUTABLE) $(TEST_EXECUTABLE2)
 
 .PHONY:  all lib lib-seq clean clean-all
 
-all: lib lib-seq demo test  
+all: lib lib-seq demo test test2
 
 lib-seq: $(LIB_DIR)/$(LIB_SEQ_NAME)
  
@@ -52,7 +57,10 @@ $(DEMO_EXECUTABLE): lib-seq $(DEMO_OBJECTS)
 	$(CC) $(CFLAGS) $(DEMO_OBJECTS) -L$(LIB_DIR) -l$(LIB_SEQ) -o $@ 
 
 $(TEST_EXECUTABLE): lib $(TEST_OBJECTS)
-	$(CC) $(CFLAGS) $(TEST_OBJECTS) -lpthread -L$(LIB_DIR) -l$(LIB) -o $@ 
+	$(CC) $(CFLAGS) $(TEST_OBJECTS) -lpthread -L$(LIB_DIR) -l$(LIB) -o $@  
+
+$(TEST_EXECUTABLE2): lib $(TEST_OBJECTS2)
+	$(CC) $(CFLAGS) $(TEST_OBJECTS2) -lpthread -L$(LIB_DIR) -l$(LIB) -o $@
 
 clean:
 	rm -rf *.o *~ 
