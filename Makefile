@@ -1,3 +1,10 @@
+# To compile test1.c use:
+#     make test TEST_FILE=test1.c
+# To run test1 use:
+#     ./test
+#
+# You can also compile test2.c or any other test file the same way.
+
 CC = gcc
 
 CCWARNINGS = -W -Wall -Wno-unused-parameter -Wno-unused-variable \
@@ -24,12 +31,17 @@ TEST_FILE   ?= aq_test.c
 TEST_SOURCES = $(TEST_FILE) aux.c
 TEST_OBJECTS = $(TEST_SOURCES:.c=.o)
 
+#TEST_FILE1   ?= test1.c
+#TEST_SOURCES1 = $(TEST_FILE1) aux.c
+#TEST_OBJECTS1 = $(TEST_SOURCES1:.c=.o)
+
 TEST_FILE2   ?= test2.c
 TEST_SOURCES2 = $(TEST_FILE2) aux.c
 TEST_OBJECTS2 = $(TEST_SOURCES2:.c=.o)
 
 DEMO_EXECUTABLE = demo
 TEST_EXECUTABLE = test
+TEST_EXECUTABLE1 = test1
 TEST_EXECUTABLE2 = test2
 
 EXECUTABLES = $(DEMO_EXECUTABLE) $(TEST_EXECUTABLE) $(TEST_EXECUTABLE2)
