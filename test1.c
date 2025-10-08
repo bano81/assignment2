@@ -21,11 +21,10 @@ static AlarmQueue q;
 
 void * producer (void * arg) {
   msleep(500);
-  put_normal(q, 1);
   put_alarm(q, 42);
   put_alarm(q, 43);
   msleep(500);
-  put_alarm(q, 44);  
+  put_normal(q, 1); 
   return 0;
 }
 

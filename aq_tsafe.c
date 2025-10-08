@@ -47,21 +47,16 @@ int aq_send(AlarmQueue aq, void * msg, MsgKind k) {
   AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
   Msg * newMsg = malloc(sizeof(Msg));
   if (newMsg == NULL) return AQ_NO_ROOM; // malloc failed
-
-  newMsg->ID = msg;  // This might also be problematic - see below
+  newMsg->ID = msg;  
   newMsg->type = k; 
   newMsg->next = NULL;
-
   pthread_mutex_lock(&queue->lock);
-  if(k == AQ_ALARM){
-    // wait for alarm slot without blocking normal messages
+  if(k == AQ_ALARM){ // Wait if there's already an alarm
     while(queue->alarmCount >= 1) {
         pthread_cond_wait(&queue->alarm_available, &queue->lock); 
     }
   }
-  // Insert message into the queue
   if(queue->head == NULL){ // empty queue
-    //Empty queue
       queue->head = newMsg;
       queue->tail = newMsg;
   } else if(k == AQ_ALARM) { // insert alarm at the front
@@ -81,13 +76,11 @@ int aq_send(AlarmQueue aq, void * msg, MsgKind k) {
 int aq_recv(AlarmQueue aq, void * * msg) {
   if (aq == NULL) return AQ_UNINIT;
   if (msg == NULL) return AQ_NULL_MSG; 
-
   AlarmQueueImpl * queue = (AlarmQueueImpl *) aq;
   Msg * toReceive;
   MsgKind msgType;
   pthread_mutex_lock(&queue->lock);   // lock the critical section
-  // Wait until there's a message to receive
-  while (queue->size == 0) {
+  while (queue->size == 0) { // Wait until there's a message to receive
       pthread_cond_wait(&queue->not_empty, &queue->lock); // Wait for a message to be available
   }
   // Remove alarm from the front if exists
