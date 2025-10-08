@@ -21,24 +21,22 @@ static AlarmQueue q;
 
 void * producer (void * arg) {
   msleep(500);
-  put_normal(q, 1); // should succeed
-  msleep(500);
-  put_alarm(q, 42); // should succeed
-  put_alarm(q, 43); // should fail
-  put_normal(q, 2); // should succeed
+  put_normal(q, 1); 
+  put_normal(q, 2);
+  put_alarm(q, 42);  
+  put_alarm(q, 43); 
   msleep(500); //
-  put_alarm(q, 47); // should succeed
-  put_normal(q, 3); // should succeed
+  put_normal(q, 3); 
   return 0;
 }
 
 void * consumer(void * arg) {
-  get(q); // should get normal 1
+  get(q); 
   msleep(700);//
-  get(q); // should get alarm 42
-  get(q); // should get alarm 47
-  get(q); // should succeed
-  get(q); // should succeed
+  get(q); 
+  get(q); 
+  get(q); 
+  get(q); 
 
   return 0;
 }
