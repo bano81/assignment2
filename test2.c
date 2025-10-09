@@ -18,28 +18,41 @@
  */
 
 static AlarmQueue q;
+int delay = 300;
 
-void * producer (void * arg) {
-  msleep(500);
-  put_normal(q, 1); 
-  put_normal(q, 2);
-  put_alarm(q, 42);  
-  put_alarm(q, 43); 
-  msleep(500); //
-  put_normal(q, 3); 
+void * producer1 (void * arg) {
+  for(int i=0; i < 3; i++) {
+      msleep(delay);
+      put_normal(q, i);
+  }
+  return 0;
+}
+
+void * producer2 (void * arg) {
+  for(int i=3; i < 6; i++) {
+      msleep(delay);
+      put_normal(q, i);
+  }
+  return 0;
+}
+
+void * producer3 (void * arg) {
+  for(int i=6; i < 9; i++) {
+      msleep(delay);
+      put_normal(q, i);
+  }
   return 0;
 }
 
 void * consumer(void * arg) {
-  get(q); 
-  msleep(700);//
-  get(q); 
-  get(q); 
-  get(q); 
-  get(q); 
-
+  
+  for (int i = 0; i < 9; i++) {
+      msleep(100);
+      get(q);
+  }
   return 0;
 }
+
 
 int main(int argc, char ** argv) {
     int ret;
@@ -51,25 +64,28 @@ int main(int argc, char ** argv) {
     exit(1);
   }
   
-  pthread_t t1;
-  pthread_t t2;
+  pthread_t t1, t2, t3, t4 ;
 
-  void * res1;
-  void * res2;
+
+  void *res1, *res2, *res3, *res4;
 
   printf("----------------\n");
 
   /* Fork threads */
-  pthread_create(&t1, NULL, producer, NULL);
-  pthread_create(&t2, NULL, consumer, NULL);
-  
+  pthread_create(&t1, NULL, producer1, NULL);
+  pthread_create(&t2, NULL, producer2, NULL);
+  pthread_create(&t3, NULL, producer3, NULL);
+ 
   /* Join with all threads */
-  pthread_join(t1, &res1);   // wait for thread 1 (producer) to finish and res1 gets its return value
-  pthread_join(t2, &res2);   // wait for thread 2 (consumer) to finish and res2 gets its return value
+  pthread_join(t1, &res1);
+  pthread_join(t2, &res2);
+  pthread_join(t3, &res3);
+   pthread_create(&t4, NULL, consumer, NULL);
+  pthread_join(t4, &res4);
 
   printf("----------------\n");
-  printf("Threads terminated with %ld, %ld\n", (uintptr_t) res1, (uintptr_t) res2);
-
+  //printf("Threads terminated with %ld, %ld\n", (uintptr_t) res1, (uintptr_t) res2);
+  printf("Threads terminated with %ld, %ld, %ld, %ld\n", (uintptr_t) res1, (uintptr_t) res2, (uintptr_t) res3, (uintptr_t) res4);
   print_sizes(q);
   
   return 0;
